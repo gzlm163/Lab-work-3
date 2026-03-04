@@ -349,7 +349,8 @@ paket-files/
 
 # Tabs Studio
 *.tss
-
+*.csproj
+*.CSharpBasics.sln‎
 # Telerik's JustMock configuration file
 *.jmconfig
 
