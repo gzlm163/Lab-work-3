@@ -1,0 +1,29 @@
+root = true
+
+# Для всех файлов C#
+[*.cs]
+
+# Отступы: пробелы, размер 2
+indent_style = space
+indent_size = 2
+
+# Скобки на той же строке (K&R стиль)
+csharp_new_line_before_open_brace = none
+csharp_new_line_before_else = none
+csharp_new_line_before_catch = none
+
+# Имена локальных переменных — lowerCamelCase
+dotnet_naming_rule.locals_should_be_camel_case.severity = warning
+dotnet_naming_rule.locals_should_be_camel_case.symbols = locals_symbol_group
+dotnet_naming_rule.locals_should_be_camel_case.style = camel_case_style
+
+dotnet_naming_symbols.locals_symbol_group.applicable_kinds = local
+dotnet_naming_style.camel_case_style.capitalization = camel_case
+
+# Запрет на var для простых типов (int, string и т.д.)
+csharp_style_var_for_built_in_types = false:warning
+csharp_style_var_when_type_is_apparent = false:warning
+csharp_style_var_elsewhere = false:warning
+
+# Рекомендация: явно указывать модификаторы доступа
+dotnet_style_require_accessibility_modifiers = always:warning
