@@ -7,18 +7,18 @@ public class SquareMatrix {
     get { return matrix.GetLength(0); }
   }
 
-  public SquareMatrix(int n) {
-    if (n <= 0)
-      throw new MatrixSizeException("Размер матрицы должен быть положительным числом");
+  public SquareMatrix(int size) {
+    if (size <= 0)
+      throw new MatrixSizeException("Matrix size must be positive");
 
-    matrix = new int[n, n];
+    matrix = new int[size, size];
     InputMatrix();
   }
 
-  private SquareMatrix(int n, bool empty) {
-    if (n <= 0)
-      throw new MatrixSizeException("Размер матрицы должен быть положительным числом");
-    matrix = new int[n, n];
+  private SquareMatrix(int size, bool empty) {
+    if (size <= 0)
+      throw new MatrixSizeException("Matrix size must be positive");
+    matrix = new int[size, size];
   }
 
   public SquareMatrix(SquareMatrix original) {
@@ -26,28 +26,28 @@ public class SquareMatrix {
       throw new ArgumentNullException(nameof(original));
 
     this.matrix = new int[original.Size, original.Size];
-    for (int i = 0; i < original.Size; i++) {
-      for (int j = 0; j < original.Size; j++) {
-        this.matrix[i, j] = original.matrix[i, j];
+    for (int rowIndex = 0; rowIndex < original.Size; ++rowIndex) {
+      for (int columnIndex = 0; columnIndex < original.Size; ++columnIndex) {
+        this.matrix[rowIndex, columnIndex] = original.matrix[rowIndex, columnIndex];
       }
     }
   }
 
   private void InputMatrix() {
-    Console.WriteLine($" Enter the matrix elements: ");
-    for (int i = 0; i < Size; i++) {
-      for (int j = 0; j < Size; j++) {
-        Console.Write($" Matrix: ");
-        matrix[i, j] = int.Parse(Console.ReadLine());
+    Console.WriteLine("Enter the matrix elements: ");
+    for (int rowIndex = 0; rowIndex < Size; ++rowIndex) {
+      for (int columnIndex = 0; columnIndex < Size; ++columnIndex) {
+        Console.Write($"Matrix[{rowIndex},{columnIndex}] = ");
+        matrix[rowIndex, columnIndex] = int.Parse(Console.ReadLine());
       }
     }
   }
 
   public override string ToString() {
     string result = "";
-    for (int i = 0; i < Size; i++) {
-      for (int j = 0; j < Size; j++) {
-        result += matrix[i, j] + "\t";
+    for (int rowIndex = 0; rowIndex < Size; ++rowIndex) {
+      for (int columnIndex = 0; columnIndex < Size; ++columnIndex) {
+        result += matrix[rowIndex, columnIndex] + "\t";
       }
       result += "\n";
     }
@@ -58,161 +58,161 @@ public class SquareMatrix {
     if (Size == 1) return matrix[0, 0];
     if (Size == 2) return matrix[0, 0] * matrix[1, 1] - matrix[0, 1] * matrix[1, 0];
 
-    double det = 0;
+    double determinant = 0;
     int sign = 1;
 
-    for (int j = 0; j < Size; j++) {
+    for (int columnIndex = 0; columnIndex < Size; ++columnIndex) {
       int[,] minorArray = new int[Size - 1, Size - 1];
 
-      for (int i = 1; i < Size; i++) {
-        for (int k = 0; k < Size; k++) {
-          if (k < j) {
-            minorArray[i - 1, k] = matrix[i, k];
+      for (int rowIndex = 1; rowIndex < Size; ++rowIndex) {
+        for (int minorColumnIndex = 0; minorColumnIndex < Size; ++minorColumnIndex) {
+          if (minorColumnIndex < columnIndex) {
+            minorArray[rowIndex - 1, minorColumnIndex] = matrix[rowIndex, minorColumnIndex];
           }
-          else if (k > j) {
-            minorArray[i - 1, k - 1] = matrix[i, k];
+          else if (minorColumnIndex > columnIndex) {
+            minorArray[rowIndex - 1, minorColumnIndex - 1] = matrix[rowIndex, minorColumnIndex];
           }
         }
       }
 
       SquareMatrix minor = new SquareMatrix(Size - 1, true);
-      for (int i = 0; i < Size - 1; i++) {
-        for (int k = 0; k < Size - 1; k++) {
-          minor.matrix[i, k] = minorArray[i, k];
+      for (int rowIndex = 0; rowIndex < Size - 1; ++rowIndex) {
+        for (int columnIndexMinor = 0; columnIndexMinor < Size - 1; ++columnIndexMinor) {
+          minor.matrix[rowIndex, columnIndexMinor] = minorArray[rowIndex, columnIndexMinor];
         }
       }
 
-      det += sign * matrix[0, j] * minor.Determinant();
+      determinant += sign * matrix[0, columnIndex] * minor.Determinant();
       sign = -sign;
     }
 
-    return det;
+    return determinant;
   }
 
-  private double Minor2x2(int a, int b, int c, int d) {
-    return a * d - b * c;
+  private double Minor2x2(int elementA, int elementB, int elementC, int elementD) {
+    return elementA * elementD - elementB * elementC;
   }
 
   public SquareMatrix Clone() {
     return new SquareMatrix(this);
   }
 
-  public static SquareMatrix operator +(SquareMatrix a, SquareMatrix b) {
-    if (a == null || b == null)
-      throw new ArgumentNullException("Операнды не могут быть null");
+  public static SquareMatrix operator +(SquareMatrix firstMatrix, SquareMatrix secondMatrix) {
+    if (firstMatrix == null || secondMatrix == null)
+      throw new ArgumentNullException("Operands cannot be null");
 
-    if (a.Size != b.Size)
-      throw new MatrixSizeException("Матрицы должны быть одинакового размера для сложения");
+    if (firstMatrix.Size != secondMatrix.Size)
+      throw new MatrixSizeException("Matrices must have the same size for addition");
 
-    SquareMatrix result = new SquareMatrix(a.Size, true);
+    SquareMatrix resultMatrix = new SquareMatrix(firstMatrix.Size, true);
 
-    for (int i = 0; i < a.Size; i++) {
-      for (int j = 0; j < a.Size; j++) {
-        result.matrix[i, j] = a.matrix[i, j] + b.matrix[i, j];
+    for (int rowIndex = 0; rowIndex < firstMatrix.Size; ++rowIndex) {
+      for (int columnIndex = 0; columnIndex < firstMatrix.Size; ++columnIndex) {
+        resultMatrix.matrix[rowIndex, columnIndex] = firstMatrix.matrix[rowIndex, columnIndex] + secondMatrix.matrix[rowIndex, columnIndex];
       }
     }
 
-    return result;
+    return resultMatrix;
   }
 
-  public static SquareMatrix operator *(SquareMatrix a, SquareMatrix b) {
-    if (a == null || b == null)
-      throw new ArgumentNullException("Операнды не могут быть null");
+  public static SquareMatrix operator *(SquareMatrix firstMatrix, SquareMatrix secondMatrix) {
+    if (firstMatrix == null || secondMatrix == null)
+      throw new ArgumentNullException("Operands cannot be null");
 
-    if (a.Size != b.Size)
-      throw new MatrixSizeException("Матрицы должны быть одинакового размера для умножения");
+    if (firstMatrix.Size != secondMatrix.Size)
+      throw new MatrixSizeException("Matrices must have the same size for multiplication");
 
-    SquareMatrix result = new SquareMatrix(a.Size, true);
+    SquareMatrix resultMatrix = new SquareMatrix(firstMatrix.Size, true);
 
-    for (int i = 0; i < a.Size; i++) {
-      for (int j = 0; j < a.Size; j++) {
+    for (int rowIndex = 0; rowIndex < firstMatrix.Size; ++rowIndex) {
+      for (int columnIndex = 0; columnIndex < firstMatrix.Size; ++columnIndex) {
         int sum = 0;
-        for (int k = 0; k < a.Size; k++) {
-          sum += a.matrix[i, k] * b.matrix[k, j];
+        for (int kIndex = 0; kIndex < firstMatrix.Size; ++kIndex) {
+          sum += firstMatrix.matrix[rowIndex, kIndex] * secondMatrix.matrix[kIndex, columnIndex];
         }
-        result.matrix[i, j] = sum;
+        resultMatrix.matrix[rowIndex, columnIndex] = sum;
       }
     }
 
-    return result;
+    return resultMatrix;
   }
 
   public override bool Equals(object obj) {
     if (obj == null || !(obj is SquareMatrix)) return false;
-    SquareMatrix other = (SquareMatrix)obj;
+    SquareMatrix otherMatrix = (SquareMatrix)obj;
 
-    if (this.Size != other.Size) return false;
+    if (this.Size != otherMatrix.Size) return false;
 
-    for (int i = 0; i < Size; i++) {
-      for (int j = 0; j < Size; j++) {
-        if (this.matrix[i, j] != other.matrix[i, j]) return false;
+    for (int rowIndex = 0; rowIndex < Size; ++rowIndex) {
+      for (int columnIndex = 0; columnIndex < Size; ++columnIndex) {
+        if (this.matrix[rowIndex, columnIndex] != otherMatrix.matrix[rowIndex, columnIndex]) return false;
       }
     }
     return true;
   }
 
   public override int GetHashCode() {
-    int hash = 0;
-    for (int i = 0; i < Size; i++) {
-      for (int j = 0; j < Size; j++) {
-        hash += matrix[i, j].GetHashCode();
+    int hashCode = 0;
+    for (int rowIndex = 0; rowIndex < Size; ++rowIndex) {
+      for (int columnIndex = 0; columnIndex < Size; ++columnIndex) {
+        hashCode += matrix[rowIndex, columnIndex].GetHashCode();
       }
     }
-    return hash;
+    return hashCode;
   }
 
-  public int CompareTo(SquareMatrix other) {
-    if (other == null) return 1;
+  public int CompareTo(SquareMatrix otherMatrix) {
+    if (otherMatrix == null) return 1;
 
-    int sumThis = 0;
-    int sumOther = 0;
+    int sumThisMatrix = 0;
+    int sumOtherMatrix = 0;
 
-    for (int i = 0; i < Size; i++) {
-      for (int j = 0; j < Size; j++) {
-        sumThis += this.matrix[i, j];
-        sumOther += other.matrix[i, j];
+    for (int rowIndex = 0; rowIndex < Size; ++rowIndex) {
+      for (int columnIndex = 0; columnIndex < Size; ++columnIndex) {
+        sumThisMatrix += this.matrix[rowIndex, columnIndex];
+        sumOtherMatrix += otherMatrix.matrix[rowIndex, columnIndex];
       }
     }
 
-    return sumThis.CompareTo(sumOther);
+    return sumThisMatrix.CompareTo(sumOtherMatrix);
   }
 
-  public static bool operator ==(SquareMatrix a, SquareMatrix b) {
-    if (ReferenceEquals(a, null) && ReferenceEquals(b, null)) return true;
-    if (ReferenceEquals(a, null) || ReferenceEquals(b, null)) return false;
-    return a.Equals(b);
+  public static bool operator ==(SquareMatrix firstMatrix, SquareMatrix secondMatrix) {
+    if (ReferenceEquals(firstMatrix, null) && ReferenceEquals(secondMatrix, null)) return true;
+    if (ReferenceEquals(firstMatrix, null) || ReferenceEquals(secondMatrix, null)) return false;
+    return firstMatrix.Equals(secondMatrix);
   }
 
-  public static bool operator !=(SquareMatrix a, SquareMatrix b) {
-    return !(a == b);
+  public static bool operator !=(SquareMatrix firstMatrix, SquareMatrix secondMatrix) {
+    return !(firstMatrix == secondMatrix);
   }
 
-  public static bool operator >(SquareMatrix a, SquareMatrix b) {
-    if (a == null || b == null) return false;
-    return a.CompareTo(b) > 0;
+  public static bool operator >(SquareMatrix firstMatrix, SquareMatrix secondMatrix) {
+    if (firstMatrix == null || secondMatrix == null) return false;
+    return firstMatrix.CompareTo(secondMatrix) > 0;
   }
 
-  public static bool operator <(SquareMatrix a, SquareMatrix b) {
-    if (a == null || b == null) return false;
-    return a.CompareTo(b) < 0;
+  public static bool operator <(SquareMatrix firstMatrix, SquareMatrix secondMatrix) {
+    if (firstMatrix == null || secondMatrix == null) return false;
+    return firstMatrix.CompareTo(secondMatrix) < 0;
   }
 
-  public static bool operator >=(SquareMatrix a, SquareMatrix b) {
-    if (a == null || b == null) return false;
-    return a.CompareTo(b) >= 0;
+  public static bool operator >=(SquareMatrix firstMatrix, SquareMatrix secondMatrix) {
+    if (firstMatrix == null || secondMatrix == null) return false;
+    return firstMatrix.CompareTo(secondMatrix) >= 0;
   }
 
-  public static bool operator <=(SquareMatrix a, SquareMatrix b) {
-    if (a == null || b == null) return false;
-    return a.CompareTo(b) <= 0;
+  public static bool operator <=(SquareMatrix firstMatrix, SquareMatrix secondMatrix) {
+    if (firstMatrix == null || secondMatrix == null) return false;
+    return firstMatrix.CompareTo(secondMatrix) <= 0;
   }
 
-  public static bool operator true(SquareMatrix m) {
-    if (m == null) return false;
+  public static bool operator true(SquareMatrix matrix) {
+    if (matrix == null) return false;
 
-    for (int i = 0; i < m.Size; i++) {
-      for (int j = 0; j < m.Size; j++) {
-        if (m.matrix[i, j] != 0) {
+    for (int rowIndex = 0; rowIndex < matrix.Size; ++rowIndex) {
+      for (int columnIndex = 0; columnIndex < matrix.Size; ++columnIndex) {
+        if (matrix.matrix[rowIndex, columnIndex] != 0) {
           return true;
         }
       }
@@ -220,12 +220,12 @@ public class SquareMatrix {
     return false;
   }
 
-  public static bool operator false(SquareMatrix m) {
-    if (m == null) return true;
+  public static bool operator false(SquareMatrix matrix) {
+    if (matrix == null) return true;
 
-    for (int i = 0; i < m.Size; i++) {
-      for (int j = 0; j < m.Size; j++) {
-        if (m.matrix[i, j] != 0) {
+    for (int rowIndex = 0; rowIndex < matrix.Size; ++rowIndex) {
+      for (int columnIndex = 0; columnIndex < matrix.Size; ++columnIndex) {
+        if (matrix.matrix[rowIndex, columnIndex] != 0) {
           return false;
         }
       }
@@ -233,211 +233,255 @@ public class SquareMatrix {
     return true;
   }
 
-  public static explicit operator double(SquareMatrix m) {
-    if (m == null)
-      throw new ArgumentNullException(nameof(m));
+  public static explicit operator double(SquareMatrix matrix) {
+    if (matrix == null)
+      throw new ArgumentNullException(nameof(matrix));
 
-    return m.Determinant();
+    return matrix.Determinant();
   }
 
-  public static SquareMatrix operator ~(SquareMatrix m) {
-    if (m == null)
-      throw new ArgumentNullException(nameof(m));
+  public static SquareMatrix operator ~(SquareMatrix matrix) {
+    if (matrix == null)
+      throw new ArgumentNullException(nameof(matrix));
 
-    double det = m.Determinant();
+    double determinant = matrix.Determinant();
 
-    if (det == 0)
-      throw new SingularMatrixException("Нельзя найти обратную матрицу для вырожденной матрицы");
+    if (determinant == 0)
+      throw new SingularMatrixException("Cannot find inverse matrix for singular matrix");
 
-    if (m.Size == 2) {
-      SquareMatrix result = new SquareMatrix(2, true);
-      result.matrix[0, 0] = m.matrix[1, 1];
-      result.matrix[0, 1] = -m.matrix[0, 1];
-      result.matrix[1, 0] = -m.matrix[1, 0];
-      result.matrix[1, 1] = m.matrix[0, 0];
-      return result;
+    if (matrix.Size == 2) {
+      SquareMatrix resultMatrix = new SquareMatrix(2, true);
+      resultMatrix.matrix[0, 0] = matrix.matrix[1, 1];
+      resultMatrix.matrix[0, 1] = -matrix.matrix[0, 1];
+      resultMatrix.matrix[1, 0] = -matrix.matrix[1, 0];
+      resultMatrix.matrix[1, 1] = matrix.matrix[0, 0];
+      return resultMatrix;
     }
-    else if (m.Size == 3) {
+    else if (matrix.Size == 3) {
       double[,] minors = new double[3, 3];
 
-      minors[0, 0] = m.Minor2x2(m.matrix[1, 1], m.matrix[1, 2], m.matrix[2, 1], m.matrix[2, 2]);
-      minors[0, 1] = m.Minor2x2(m.matrix[1, 0], m.matrix[1, 2], m.matrix[2, 0], m.matrix[2, 2]);
-      minors[0, 2] = m.Minor2x2(m.matrix[1, 0], m.matrix[1, 1], m.matrix[2, 0], m.matrix[2, 1]);
+      minors[0, 0] = matrix.Minor2x2(matrix.matrix[1, 1], matrix.matrix[1, 2], matrix.matrix[2, 1], matrix.matrix[2, 2]);
+      minors[0, 1] = matrix.Minor2x2(matrix.matrix[1, 0], matrix.matrix[1, 2], matrix.matrix[2, 0], matrix.matrix[2, 2]);
+      minors[0, 2] = matrix.Minor2x2(matrix.matrix[1, 0], matrix.matrix[1, 1], matrix.matrix[2, 0], matrix.matrix[2, 1]);
 
-      minors[1, 0] = m.Minor2x2(m.matrix[0, 1], m.matrix[0, 2], m.matrix[2, 1], m.matrix[2, 2]);
-      minors[1, 1] = m.Minor2x2(m.matrix[0, 0], m.matrix[0, 2], m.matrix[2, 0], m.matrix[2, 2]);
-      minors[1, 2] = m.Minor2x2(m.matrix[0, 0], m.matrix[0, 1], m.matrix[2, 0], m.matrix[2, 1]);
+      minors[1, 0] = matrix.Minor2x2(matrix.matrix[0, 1], matrix.matrix[0, 2], matrix.matrix[2, 1], matrix.matrix[2, 2]);
+      minors[1, 1] = matrix.Minor2x2(matrix.matrix[0, 0], matrix.matrix[0, 2], matrix.matrix[2, 0], matrix.matrix[2, 2]);
+      minors[1, 2] = matrix.Minor2x2(matrix.matrix[0, 0], matrix.matrix[0, 1], matrix.matrix[2, 0], matrix.matrix[2, 1]);
 
-      minors[2, 0] = m.Minor2x2(m.matrix[0, 1], m.matrix[0, 2], m.matrix[1, 1], m.matrix[1, 2]);
-      minors[2, 1] = m.Minor2x2(m.matrix[0, 0], m.matrix[0, 2], m.matrix[1, 0], m.matrix[1, 2]);
-      minors[2, 2] = m.Minor2x2(m.matrix[0, 0], m.matrix[0, 1], m.matrix[1, 0], m.matrix[1, 1]);
+      minors[2, 0] = matrix.Minor2x2(matrix.matrix[0, 1], matrix.matrix[0, 2], matrix.matrix[1, 1], matrix.matrix[1, 2]);
+      minors[2, 1] = matrix.Minor2x2(matrix.matrix[0, 0], matrix.matrix[0, 2], matrix.matrix[1, 0], matrix.matrix[1, 2]);
+      minors[2, 2] = matrix.Minor2x2(matrix.matrix[0, 0], matrix.matrix[0, 1], matrix.matrix[1, 0], matrix.matrix[1, 1]);
 
-      SquareMatrix cofactor = new SquareMatrix(3, true);
-      cofactor.matrix[0, 0] = (int)minors[0, 0];
-      cofactor.matrix[0, 1] = -(int)minors[0, 1];
-      cofactor.matrix[0, 2] = (int)minors[0, 2];
-      cofactor.matrix[1, 0] = -(int)minors[1, 0];
-      cofactor.matrix[1, 1] = (int)minors[1, 1];
-      cofactor.matrix[1, 2] = -(int)minors[1, 2];
-      cofactor.matrix[2, 0] = (int)minors[2, 0];
-      cofactor.matrix[2, 1] = -(int)minors[2, 1];
-      cofactor.matrix[2, 2] = (int)minors[2, 2];
+      SquareMatrix cofactorMatrix = new SquareMatrix(3, true);
+      cofactorMatrix.matrix[0, 0] = (int)minors[0, 0];
+      cofactorMatrix.matrix[0, 1] = -(int)minors[0, 1];
+      cofactorMatrix.matrix[0, 2] = (int)minors[0, 2];
+      cofactorMatrix.matrix[1, 0] = -(int)minors[1, 0];
+      cofactorMatrix.matrix[1, 1] = (int)minors[1, 1];
+      cofactorMatrix.matrix[1, 2] = -(int)minors[1, 2];
+      cofactorMatrix.matrix[2, 0] = (int)minors[2, 0];
+      cofactorMatrix.matrix[2, 1] = -(int)minors[2, 1];
+      cofactorMatrix.matrix[2, 2] = (int)minors[2, 2];
 
-      SquareMatrix adjugate = new SquareMatrix(3, true);
-      for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-          adjugate.matrix[i, j] = cofactor.matrix[j, i];
+      SquareMatrix adjugateMatrix = new SquareMatrix(3, true);
+      for (int rowIndex = 0; rowIndex < 3; ++rowIndex)
+        for (int columnIndex = 0; columnIndex < 3; ++columnIndex)
+          adjugateMatrix.matrix[rowIndex, columnIndex] = cofactorMatrix.matrix[columnIndex, rowIndex];
 
-      SquareMatrix result = new SquareMatrix(3, true);
-      for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-          result.matrix[i, j] = (int)(adjugate.matrix[i, j] / det);
+      SquareMatrix resultMatrix = new SquareMatrix(3, true);
+      for (int rowIndex = 0; rowIndex < 3; ++rowIndex)
+        for (int columnIndex = 0; columnIndex < 3; ++columnIndex)
+          resultMatrix.matrix[rowIndex, columnIndex] = (int)(adjugateMatrix.matrix[rowIndex, columnIndex] / determinant);
 
-      return result;
+      return resultMatrix;
     }
     else {
-      throw new NotSupportedMatrixOperationException($"Обратная матрица для размера {m.Size}x{m.Size} не реализована");
+      throw new NotSupportedMatrixOperationException($"Inverse matrix for size {matrix.Size}x{matrix.Size} is not implemented");
     }
   }
 }
 
 public class MatrixSizeException : Exception {
-  public MatrixSizeException() : base("Ошибка: некорректный размер матрицы") { }
+  public MatrixSizeException() : base("Error: invalid matrix size") { }
   public MatrixSizeException(string message) : base(message) { }
 }
 
 public class SingularMatrixException : Exception {
-  public SingularMatrixException() : base("Ошибка: матрица вырожденная (детерминант = 0)") { }
+  public SingularMatrixException() : base("Error: matrix is singular (determinant = 0)") { }
   public SingularMatrixException(string message) : base(message) { }
 }
 
 public class NotSupportedMatrixOperationException : Exception {
-  public NotSupportedMatrixOperationException() : base("Операция не поддерживается для данного типа матриц") { }
+  public NotSupportedMatrixOperationException() : base("Operation is not supported for this type of matrix") { }
   public NotSupportedMatrixOperationException(string message) : base(message) { }
 }
 
 class Program {
   static void Main(string[] args) {
-    SquareMatrix a = null;
-    SquareMatrix b = null;
-    bool exit = false;
+    SquareMatrix matrixA = null;
+    SquareMatrix matrixB = null;
+    bool exitProgram = false;
 
-    while (!exit) {
-      Console.WriteLine("\n========== МАТРИЧНЫЙ КАЛЬКУЛЯТОР ==========");
-      Console.WriteLine("1. Создать матрицу A");
-      Console.WriteLine("2. Создать матрицу B");
+    while (!exitProgram) {
+      Console.WriteLine("\n========== MATRIX CALCULATOR ==========");
+      Console.WriteLine("1. Create matrix A");
+      Console.WriteLine("2. Create matrix B");
       Console.WriteLine("3. A + B");
       Console.WriteLine("4. A * B");
-      Console.WriteLine("5. Сравнить A и B");
-      Console.WriteLine("6. Детерминант A");
-      Console.WriteLine("7. Детерминант B");
-      Console.WriteLine("8. Обратная матрица A");
-      Console.WriteLine("9. Обратная матрица B");
-      Console.WriteLine("10. Показать копии A и B");
-      Console.WriteLine("11. Показать все матрицы");
-      Console.WriteLine("0. Выход");
-      Console.Write("Выберите действие: ");
+      Console.WriteLine("5. A > B");
+      Console.WriteLine("6. A < B");
+      Console.WriteLine("7. A >= B");
+      Console.WriteLine("8. A <= B");
+      Console.WriteLine("9. A == B");
+      Console.WriteLine("10. A != B");
+      Console.WriteLine("11. Determinant of A");
+      Console.WriteLine("12. Determinant of B");
+      Console.WriteLine("13. Inverse matrix of A");
+      Console.WriteLine("14. Inverse matrix of B");
+      Console.WriteLine("15. Create copy of A");
+      Console.WriteLine("16. Create copy of B");
+      Console.WriteLine("17. Show all matrices");
+      Console.WriteLine("0. Exit");
+      Console.Write("Choose action: ");
 
-      string choice = Console.ReadLine();
+      string userChoice = Console.ReadLine();
 
       try {
-        switch (choice) {
+        switch (userChoice) {
           case "1":
-            Console.Write("Введите размер матрицы A: ");
-            int n1 = int.Parse(Console.ReadLine());
-            a = new SquareMatrix(n1);
+            Console.Write("Enter size of matrix A: ");
+            int sizeA = int.Parse(Console.ReadLine());
+            matrixA = new SquareMatrix(sizeA);
             break;
 
           case "2":
-            Console.Write("Введите размер матрицы B: ");
-            int n2 = int.Parse(Console.ReadLine());
-            b = new SquareMatrix(n2);
+            Console.Write("Enter size of matrix B: ");
+            int sizeB = int.Parse(Console.ReadLine());
+            matrixB = new SquareMatrix(sizeB);
             break;
 
           case "3":
-            if (a == null || b == null)
-              Console.WriteLine("Сначала создайте обе матрицы!");
+            if (matrixA == null || matrixB == null)
+              Console.WriteLine("Create both matrices first!");
             else
-              Console.WriteLine("A + B = \n" + (a + b));
+              Console.WriteLine("A + B = \n" + (matrixA + matrixB));
             break;
 
           case "4":
-            if (a == null || b == null)
-              Console.WriteLine("Сначала создайте обе матрицы!");
+            if (matrixA == null || matrixB == null)
+              Console.WriteLine("Create both matrices first!");
             else
-              Console.WriteLine("A * B = \n" + (a * b));
+              Console.WriteLine("A * B = \n" + (matrixA * matrixB));
             break;
 
           case "5":
-            if (a == null || b == null)
-              Console.WriteLine("Сначала создайте обе матрицы!");
-            else {
-              Console.WriteLine($"A > B: {a > b}");
-              Console.WriteLine($"A < B: {a < b}");
-              Console.WriteLine($"A == B: {a == b}");
-            }
+            if (matrixA == null || matrixB == null)
+              Console.WriteLine("Create both matrices first!");
+            else
+              Console.WriteLine($"A > B: {matrixA > matrixB}");
             break;
 
           case "6":
-            if (a == null)
-              Console.WriteLine("Сначала создайте матрицу A!");
+            if (matrixA == null || matrixB == null)
+              Console.WriteLine("Create both matrices first!");
             else
-              Console.WriteLine($"Детерминант A = {(double)a}");
+              Console.WriteLine($"A < B: {matrixA < matrixB}");
             break;
 
           case "7":
-            if (b == null)
-              Console.WriteLine("Сначала создайте матрицу B!");
+            if (matrixA == null || matrixB == null)
+              Console.WriteLine("Create both matrices first!");
             else
-              Console.WriteLine($"Детерминант B = {(double)b}");
+              Console.WriteLine($"A >= B: {matrixA >= matrixB}");
             break;
 
           case "8":
-            if (a == null)
-              Console.WriteLine("Сначала создайте матрицу A!");
+            if (matrixA == null || matrixB == null)
+              Console.WriteLine("Create both matrices first!");
             else
-              Console.WriteLine("Обратная матрица A:\n" + (~a));
+              Console.WriteLine($"A <= B: {matrixA <= matrixB}");
             break;
 
           case "9":
-            if (b == null)
-              Console.WriteLine("Сначала создайте матрицу B!");
+            if (matrixA == null || matrixB == null)
+              Console.WriteLine("Create both matrices first!");
             else
-              Console.WriteLine("Обратная матрица B:\n" + (~b));
+              Console.WriteLine($"A == B: {matrixA == matrixB}");
             break;
 
           case "10":
-            if (a == null || b == null)
-              Console.WriteLine("Сначала создайте обе матрицы!");
-            else {
-              SquareMatrix aCopy = a.Clone();
-              SquareMatrix bCopy = b.Clone();
-              Console.WriteLine("Копия A:\n" + aCopy);
-              Console.WriteLine("Копия B:\n" + bCopy);
-            }
+            if (matrixA == null || matrixB == null)
+              Console.WriteLine("Create both matrices first!");
+            else
+              Console.WriteLine($"A != B: {matrixA != matrixB}");
             break;
 
           case "11":
-            if (a == null || b == null)
-              Console.WriteLine("Сначала создайте обе матрицы!");
+            if (matrixA == null)
+              Console.WriteLine("Create matrix A first!");
+            else
+              Console.WriteLine($"Determinant of A = {(double)matrixA}");
+            break;
+
+          case "12":
+            if (matrixB == null)
+              Console.WriteLine("Create matrix B first!");
+            else
+              Console.WriteLine($"Determinant of B = {(double)matrixB}");
+            break;
+
+          case "13":
+            if (matrixA == null)
+              Console.WriteLine("Create matrix A first!");
+            else
+              Console.WriteLine("Inverse matrix of A:\n" + (~matrixA));
+            break;
+
+          case "14":
+            if (matrixB == null)
+              Console.WriteLine("Create matrix B first!");
+            else
+              Console.WriteLine("Inverse matrix of B:\n" + (~matrixB));
+            break;
+
+          case "15":
+            if (matrixA == null)
+              Console.WriteLine("Create matrix A first!");
             else {
-              Console.WriteLine("Матрица A:\n" + a);
-              Console.WriteLine("Матрица B:\n" + b);
+              SquareMatrix copyOfA = matrixA.Clone();
+              Console.WriteLine("Copy of A:\n" + copyOfA);
+            }
+            break;
+
+          case "16":
+            if (matrixB == null)
+              Console.WriteLine("Create matrix B first!");
+            else {
+              SquareMatrix copyOfB = matrixB.Clone();
+              Console.WriteLine("Copy of B:\n" + copyOfB);
+            }
+            break;
+
+          case "17":
+            if (matrixA == null || matrixB == null)
+              Console.WriteLine("Create both matrices first!");
+            else {
+              Console.WriteLine("Matrix A:\n" + matrixA);
+              Console.WriteLine("Matrix B:\n" + matrixB);
             }
             break;
 
           case "0":
-            exit = true;
-            Console.WriteLine("До свидания!");
+            exitProgram = true;
             break;
 
           default:
-            Console.WriteLine("Неверный выбор!");
+            Console.WriteLine("Invalid choice!");
             break;
         }
       }
-      catch (Exception ex) {
-        Console.WriteLine($"Ошибка: {ex.Message}");
+      catch (Exception error) {
+        Console.WriteLine($"Error: {error.Message}");
       }
     }
   }
